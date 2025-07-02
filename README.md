@@ -26,7 +26,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Anas-KhanWP/c_bot2.git
    cd c_bot2
    ```
 
@@ -77,7 +77,7 @@ GEMMA_3 = ModelConfig("PetroStav/gemma3-tools:12b", ModelProvider.OLLAMA, 0.7)
 LLAMA_3_3 = ModelConfig("llama-3.3-70b-versatile", ModelProvider.GROQ, 0.0)
 
 # Set active model
-MODEL_CONFIG = LLAMA_3_3  # Using Groq by default
+MODEL_CONFIG = QWEN_2_5  # Using Groq by default
 ```
 
 ### Database
