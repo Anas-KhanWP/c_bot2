@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 from querymancer.agent import ask, create_history
 from querymancer.config import Config
 from querymancer.models import create_llm
-from querymancer.tools import get_available_tools, with_sql_cursor
+from querymancer.tools import get_available_tools, with_mongo_client
 
 load_dotenv()
 
@@ -33,6 +33,20 @@ def get_model() -> BaseChatModel:
     llm = llm.bind_tools(get_available_tools())
     return llm
 
+@st.cache_data(show_spinner=False)
+def get_db_info():
+    """Get database information and cache it."""
+    try:
+        with with_mongo_client() as db:
+            collections = db.list_collection_names()
+            collection_info = {}
+            for collection_name in collections:
+                count = db[collection_name].count_documents({})
+                collection_info[collection_name] = count
+        return collections, collection_info, None
+    except Exception as e:
+        return [], {}, str(e)
+
 def load_css(css_file):
     """Load custom CSS from a file."""
     with open(css_file, "r") as f:
@@ -52,18 +66,19 @@ st.subheader("Your AI Assistant")
 
 with st.sidebar:
     st.markdown("### Database Configuration")
-    st.write(f"**File:** {Config.Paths.DATABASE_PATH.relative_to(Config.Paths.APP_HOME)}")
-    db_size = Config.Paths.DATABASE_PATH.stat().st_size / (1024 * 1024)  # Size in MB
-    st.write(f"**Size:** {db_size:.2f} MB")
+    st.write(f"**Database:** {Config.Database.DATABASE_NAME}")
+    st.write(f"**Connection:** MongoDB Atlas")
+    st.write(f"**Type:** MongoDB")
     
-    with with_sql_cursor() as cursor:
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-        tables = [row[0] for row in cursor.fetchall()]
-        st.write(f"**Tables:**")
-        for table in tables:
-            cursor.execute(f"SELECT COUNT(*) FROM {table}")
-            count = cursor.fetchone()[0]
-            st.write(f"- {table} ({count} rows)")
+    collections, collection_info, error = get_db_info()
+    
+    if error:
+        st.error(f"Error connecting to database: {error}")
+    else:
+        st.write(f"**Collections:**")
+        for collection_name in collections:
+            count = collection_info.get(collection_name, 0)
+            st.write(f"- {collection_name} ({count} documents)")
             
 if "messages" not in st.session_state:
     st.session_state.messages = create_history()
