@@ -1,0 +1,28 @@
+/* Querymancer Custom Styles */
+
+/* Main container styling */
+.main {
+    padding-top: 1rem;
+}
+
+/* Chat message styling */
+.stChatMessage {
+    margin-bottom: 1rem;
+}
+
+/* Header styling */
+h1 {
+    color: #1f77b4;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    color: #666;
+    font-weight: 400;
+    margin-bottom: 2rem;
+}
+
+/* Sidebar styling */
+.css-1d391kg {
+    background-color: #f8f9fa;
+}
